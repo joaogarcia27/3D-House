@@ -1,0 +1,27 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATA_DIR=/data
+      - PORT=3001
+    env_file:
+      - .env
+    volumes:
+      - ./data:/data
+    depends_on:
+      - redis
+
+volumes:
+  redis_data:

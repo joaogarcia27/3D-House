@@ -1,0 +1,47 @@
+# Environment variables and credentials
+.env
+.env.*
+
+# Dependencies
+node_modules/
+
+# Build output and tooling caches
+dist/
+build/
+coverage/
+.vite/
+.vite-temp/
+*.tsbuildinfo
+
+# Runtime uploads and generated assets
+data/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temporary files
+.cache/
+.tmp/
+tmp/
+temp/
+*.swp
+*.swo
+*~
+
+# Editor settings
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
