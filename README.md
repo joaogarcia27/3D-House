@@ -111,19 +111,6 @@ For the most reliable parsing path, use a JPEG, PNG, or WebP floor plan. PDF is 
 | Click a minimap room | Teleport to the room center |
 | Touch joystick / swipe | Move / look on touch-only devices |
 
-## Environment variables
-
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `ANTHROPIC_API_KEY` | Yes | Parses floor plans and analyzes furniture in plans and room photos. |
-| `WORLD_LABS_API_KEY` | No | Generates room panoramas and 500k-point `.spz` splats. |
-| `FAL_API_KEY` | No | Generates depth maps and uploads source photos used by World Labs. It is therefore required when World Labs generation is enabled. |
-| `REDIS_URL` | No | BullMQ connection. Defaults to `redis://localhost:6379`. |
-| `PORT` | No | Express port. Defaults to `3001`. |
-| `GENERATION_MODE` | No | Setting `mock` currently bypasses Redis initialization, but does **not** stub the AI analysis calls. |
-| `SESSION_TTL_HOURS` | No | Reserved for session cleanup; automatic cleanup is not implemented. |
-| `DATA_DIR` | No | Session and asset directory. Workspace scripts default to `../data` from `server/`. |
-
 ## Available commands
 
 Run commands from the repository root.
@@ -139,29 +126,6 @@ Run commands from the repository root.
 | `npm run preview --workspace=client` | Preview the client production bundle. |
 
 The server does not currently serve `client/dist`, so production client and API hosting must be configured separately.
-
-## API overview
-
-All endpoints are rooted at `/api/sessions`.
-
-| Method and path | Purpose |
-| --- | --- |
-| `POST /api/sessions` | Create a session. |
-| `GET /api/sessions/:id` | Read a complete session. |
-| `POST /api/sessions/:id/floor-plan` | Upload and asynchronously parse a floor plan. |
-| `GET /api/sessions/:id/floor-plan/image` | Read the uploaded floor plan. |
-| `PUT /api/sessions/:id/rooms` | Replace the reviewed room list. |
-| `POST /api/sessions/:id/rooms` | Add a manual room. |
-| `DELETE /api/sessions/:id/rooms/:roomId` | Delete a room and its photos. |
-| `POST /api/sessions/:id/rooms/:roomId/photos` | Upload a room photo. |
-| `DELETE /api/sessions/:id/rooms/:roomId/photos/:photoId` | Delete a room photo. |
-| `PUT /api/sessions/:id/rooms/:roomId/photos/:photoId/primary` | Select a primary photo. |
-| `POST /api/sessions/:id/generate` | Enqueue one job per photographed room. |
-| `GET /api/sessions/:id/jobs` | Poll generation jobs. |
-| `GET /api/sessions/:id/events` | Subscribe to job updates over SSE. |
-| `POST /api/sessions/:id/generate-panoramas` | Retry missing panoramas for completed jobs. |
-
-Uploaded and generated files are available through session-specific API routes or the `/data` static mount.
 
 ## Project structure
 
@@ -182,29 +146,3 @@ Uploaded and generated files are available through session-specific API routes o
 ├── docker-compose.yml      # Redis and API service definitions
 └── package.json            # npm workspaces and root scripts
 ```
-
-A session normally has the following shape on disk:
-
-```text
-data/sessions/<session-id>/
-├── session.json
-├── floor-plan/
-├── photos/<room-id>/
-├── depth/<room-id>/
-└── panorama/<room-id>/
-```
-
-## Current limitations
-
-- Sessions are anonymous, stored locally, and are not automatically expired.
-- Only a single floor and axis-aligned rectangular room bounds are supported.
-- Manually added rooms have no geometry and therefore cannot be placed in the walkthrough until geometry is supplied.
-- The viewer currently renders generated splats; analyzed furniture, depth maps, and panorama-only output are stored but not used as visual fallbacks.
-- Low-end mode reduces pixel ratio but does not currently skip splat loading or load a GLB fallback.
-- `GENERATION_MODE=mock` is not a complete offline mock despite its name.
-- The full Docker server image still needs a container-ready build/lockfile flow; use Compose for Redis and run the app with npm during development.
-
-## Security
-
-API keys are loaded only by the server. Never expose them through `VITE_*` variables or commit them in `.env`, `.env.example`, logs, or screenshots. If a real key has ever been stored in a tracked/example file, revoke it and issue a replacement before sharing or deploying the project.
-
